@@ -9,22 +9,23 @@ import UIKit
 
 class AlertPresenter: AlertPresenterProtocol {
     
-    weak var delegate: AlertPresenterDelegate?
+    weak var viewController: UIViewController?
     
-    init(delegate: AlertPresenterDelegate?) {
-        self.delegate = delegate
+    init(viewController: UIViewController?) {
+        self.viewController = viewController
     }
     
-    func requestQuizResultsAlert(with alertModel: AlertModel) {
+    func show(alertModel: AlertModel) {
         let alert = UIAlertController(title: alertModel.title,
                                       message: alertModel.message,
                                       preferredStyle: .alert)
         
-        let action = UIAlertAction(title: alertModel.buttonText,
-                                   style: .default)
+        let action = UIAlertAction(title: alertModel.buttonText, style: .default) { _ in
+            alertModel.buttonAction()
+        }
         
         alert.addAction(action)
 
-        delegate?.showQuizResultsAlert(alert: alert)
+        viewController?.present(alert, animated: true)
     }
 }

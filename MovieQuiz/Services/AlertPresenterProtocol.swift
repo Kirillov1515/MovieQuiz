@@ -8,5 +8,5 @@
 import Foundation
 
 protocol AlertPresenterProtocol {
-    func requestQuizResultsAlert(with alertModel: AlertModel)
+    func show(alertModel: AlertModel)
 }
