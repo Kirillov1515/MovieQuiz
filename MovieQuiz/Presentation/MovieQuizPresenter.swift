@@ -7,7 +7,9 @@
 
 import UIKit
 
-final class MovieQuizPresenter: QuestionFactoryDelegate {
+final class MovieQuizPresenter {
+    
+    // MARK: - Variables
     
     private let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
@@ -16,7 +18,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     private weak var viewController: MovieQuizViewControllerProtocol?
     private var questionFactory: QuestionFactoryProtocol?
-    private let statisticService: StatisticService!
+    private let statisticService: StatisticService?
+    
+    // MARK: - Init
     
     init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
@@ -27,39 +31,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         viewController.showLoadingIndicator()
     }
     
-    func isLastQuestion() -> Bool {
-        currentQuestionIndex == questionsAmount - 1
-    }
-    
-    func switchToNextQuestion() {
-        currentQuestionIndex += 1
-    }
+    // MARK: - Methods
     
     func restartGame() {
         currentQuestionIndex = 0
         correctAnswers = 0
         questionFactory?.requestNextQuestion()
-    }
-    
-    private func proceedWithAnswer(isCorrect: Bool) {
-        
-        didAnswer(isCorrectAnswer: isCorrect)
-        
-        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
-            self.proceedToNextQuestionOrResults()
-        }
-    }
-    
-    private func proceedToNextQuestionOrResults() {
-        if self.isLastQuestion() {
-            viewController?.showQuizResults()
-        } else {
-            self.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
     }
     
     func makeResultMessage() -> String {
@@ -84,12 +61,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         return message
     }
     
-    func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(image: UIImage(data: model.image) ?? UIImage(),
-                                 question: model.text,
-                                 questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
-
     func noButtonClicked() {
         didAnswer(isYes: false)
     }
@@ -98,18 +69,59 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         didAnswer(isYes: true)
     }
     
+    // MARK: - Private Methods
+    
+    private func isLastQuestion() -> Bool {
+        currentQuestionIndex == questionsAmount - 1
+    }
+    
+    private func switchToNextQuestion() {
+        currentQuestionIndex += 1
+    }
+    
+    private func proceedWithAnswer(isCorrect: Bool) {
+        
+        didAnswer(isCorrectAnswer: isCorrect)
+        
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            self.proceedToNextQuestionOrResults()
+        }
+    }
+    
+    private func proceedToNextQuestionOrResults() {
+        if self.isLastQuestion() {
+            viewController?.showQuizResults()
+        } else {
+            self.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
+    }
+    
+    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+        return QuizStepViewModel(image: UIImage(data: model.image) ?? UIImage(),
+                                 question: model.text,
+                                 questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    }
+    
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else { return }
         let givenAnswer = isYes
         proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    func didAnswer(isCorrectAnswer: Bool) {
+    private func didAnswer(isCorrectAnswer: Bool) {
         if isCorrectAnswer {
             correctAnswers += 1
         }
     }
-    
+}
+
+// MARK: - Extension QuestionFactoryDelegate
+
+extension MovieQuizPresenter: QuestionFactoryDelegate {
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else { return }
         currentQuestion = question

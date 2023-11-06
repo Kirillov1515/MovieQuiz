@@ -16,7 +16,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     // MARK: - Variables
     
     private var alertPresenter: AlertPresenterProtocol?
-    private var presenter: MovieQuizPresenter!
+    private var presenter: MovieQuizPresenter?
     
     // MARK: - @IBOutlets
     
@@ -47,11 +47,11 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         
         let alertModel = AlertModel(
             title: "Этот раунд окончен!",
-            message: presenter.makeResultMessage(),
+            message: presenter?.makeResultMessage() ?? "",
             buttonText: "Сыграть ещё раз",
             buttonAction: { [weak self] in
                 guard let self = self else { return }
-                self.presenter.restartGame()
+                self.presenter?.restartGame()
             }
         )
         
@@ -82,7 +82,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
             buttonText: "Попробовать ещё раз",
             buttonAction: { [weak self] in
                 guard let self = self else { return }
-                self.presenter.restartGame()
+                self.presenter?.restartGame()
             }
         )
             
@@ -92,10 +92,10 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     // MARK: - @IBActions
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.noButtonClicked()
+        presenter?.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        presenter.yesButtonClicked()
+        presenter?.yesButtonClicked()
     }
 }
